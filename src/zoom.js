@@ -44,13 +44,14 @@ function zoom_box(chart, nav, min, max) {
         zoom_box_handle(x.getPixelForValue(max));
     }
     zoom_box_item(min, max);
-    
+    console.log("zoombox");
+
     // cursor
     canvas.addEventListener('mousemove', (mm) => {
         
         mmv = x.getValueForPixel(mm.offsetX);
 
-        if(mmv >= min-r && mmv <= min+r ||
+        /*if(mmv >= min-r && mmv <= min+r ||
            mmv >= max-r && mmv <= max+r) {
             canvas.style.cursor = 'ew-resize';
         } else if(  mmv > min+r && 
@@ -58,8 +59,8 @@ function zoom_box(chart, nav, min, max) {
             canvas.style.cursor = 'move';
         } else {
             canvas.style.cursor = 'default';
-        }
-        /*if(mm.offsetX >= x.getPixelForValue(min)-r && mm.offsetX <= x.getPixelForValue(min)+r ||
+        }*/
+        if(mm.offsetX >= x.getPixelForValue(min)-r && mm.offsetX <= x.getPixelForValue(min)+r ||
            mm.offsetX >= x.getPixelForValue(max)-r && mm.offsetX <= x.getPixelForValue(max)+r) {
             canvas.style.cursor = 'ew-resize';
         } else if(  mm.offsetX > x.getPixelForValue(min)+r && 
@@ -67,11 +68,11 @@ function zoom_box(chart, nav, min, max) {
             canvas.style.cursor = 'move';
         } else {
             canvas.style.cursor = 'default';
-        }*/
+        }
     });
 
     // resize
-    canvas.addEventListener('mousedown', (md) => {
+    /*canvas.addEventListener('mousedown', (md) => {
 
         mdv = x.getValueForPixel(md.offsetX);
 
@@ -97,7 +98,7 @@ function zoom_box(chart, nav, min, max) {
     canvas.addEventListener('mouseup', (e) => {
         canvas.style.cursor = 'default';
         canvas.onmousemove = null;
-    });
+    });*/
     
 }
 
