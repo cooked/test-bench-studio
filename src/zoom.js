@@ -1,5 +1,93 @@
 // zoom box
 
+let element;
+let lastEvent;
+
+let box = {
+    type: 'box',
+    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+    borderColor: 'rgba(54, 162, 235, 1)',
+    borderWidth: 1,
+};
+let hl = {
+    type: 'box',
+    backgroundColor: 'rgba(54, 162, 235, 1)',
+    borderColor: 'rgba(54, 162, 235, 1)',
+    borderWidth: 1,
+    enter(ctx) {
+        element = ctx.element;
+    },
+    leave() {
+        element = undefined;
+        lastEvent = undefined;
+    },
+};
+let hr = {
+    type: 'box',
+    backgroundColor: 'rgba(54, 162, 235, 1)',
+    borderColor: 'rgba(54, 162, 235, 1)',
+    borderWidth: 1,
+    enter(ctx) {
+        element = ctx.element;
+    },
+    leave() {
+        element = undefined;
+        lastEvent = undefined;
+    },
+};
+
+const drag = function(move) {
+    element.x += move;
+    element.x2 += move;
+    element.centerX += move;
+};
+  
+const handleElementDragging = function(event, chart) {
+
+    const dataX = chart.scales.x.getValueForPixel(element.centerX);
+
+    if (!lastEvent || !element) {
+        return;
+    }
+    const moveX = event.x - lastEvent.x;
+    // resize box
+    box.xMin = element.x
+    //box.centerX = (box.x+box.x2)/2;
+    
+    console.log(box);
+
+    drag(moveX);
+    lastEvent = event;
+    return true;
+};
+  
+  const handleDrag = function(event, chart) {
+    if (element) {
+      switch (event.type) {
+        case 'mousemove':
+            return handleElementDragging(event, chart);
+        //case 'mouseout':
+        case 'mouseup':
+            lastEvent = undefined;
+            break;
+        case 'mousedown':
+            lastEvent = event;
+            break;
+        default:
+      }
+    }
+  };
+
+const dragger = {
+    id: 'dragger',
+    beforeEvent(chart, args, options) {
+      if(handleDrag(args.event, chart)) {
+        args.changed = true;
+        return;
+      }
+    }
+  };
+
 function zoom_box(chart, nav, min, max) {
     
     //console.log(chart, nav, min, max);

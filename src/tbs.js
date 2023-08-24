@@ -19,7 +19,7 @@ var speed_ts = [];
 var torque_ts = [];
 
 for(var i=0; i<t.length; i++) {
-  var sec = toDateTime(t[i]);
+  var sec = t[i] * 1000 //toDateTime(t[i]);
   speed_ts.push({x: sec, y:speed[i]});
   torque_ts.push({x: sec, y:torque[i]});
 }
@@ -183,10 +183,19 @@ chart2 = new Chart(
 );
 chart2.config.data = data2;
 
-//chart2.options.plugins.annotation.annotations.hl.xMin = toDateTime(1)
-chart2.options.plugins.annotation.annotations.hl.xMin = toDateTime(0)
-chart2.options.plugins.annotation.annotations.hl.xMax = toDateTime(1)
-chart2.options.plugins.annotation.annotations.hr.xMin = toDateTime(9)
-chart2.options.plugins.annotation.annotations.hr.xMax = toDateTime(10)
+chart2.options.scales.x.min = z_min;
+chart2.options.scales.x.max = z_max;
+
+let hand = 100
+
+chart2.options.plugins.annotation.annotations.box.xMin = 0
+chart2.options.plugins.annotation.annotations.box.xMax = z_max
+
+chart2.options.plugins.annotation.annotations.hl.xMin = 0
+chart2.options.plugins.annotation.annotations.hl.xMax = hand
+
+chart2.options.plugins.annotation.annotations.hr.xMax = z_max
+chart2.options.plugins.annotation.annotations.hr.xMin = z_max - hand
+
 
 chart2.update();
