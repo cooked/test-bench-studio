@@ -81,113 +81,112 @@ document.addEventListener("click", () => {
 });
 
 
+// main chart
+const ctx = document.getElementById('chart');
+config.data = data;
+chart = new Chart(ctx, config);
 
-// load charts when DOM ready
-//document.addEventListener("DOMContentLoaded", () => {
+const z_min = data.datasets[0].data[0].x;
+const z_max = data.datasets[0].data[data.datasets[0].data.length-1].x;
+chart.options.scales.x.min = z_min;
+chart.options.scales.x.max = z_max;
+// zoom limits
+if(chart.options.plugins.zoom) {
+  chart.options.plugins.zoom.limits.x.min = z_min;
+  chart.options.plugins.zoom.limits.x.max = z_max;
+}
 
-  // main chart
-  const ctx = document.getElementById('chart');
-  config.data = data;
-  chart = new Chart(ctx, config);
+chart.update();
+
+chart.canvas.addEventListener('mousemove', (e) => { 
+  crosshair(chart, e);
+});
+chart.canvas.addEventListener("contextmenu", (e) => {
+
+  e.preventDefault();
+  cm.style.display = 'block';
+  cm.style.left = `${e.pageX}px`;
+  cm.style.top = `${e.pageY}px`;
+
+  const {data, scales:{x, y}} = chart;
   
-  const z_min = data.datasets[0].data[0].x;
-  const z_max = data.datasets[0].data[data.datasets[0].data.length-1].x;
-  chart.options.scales.x.min = z_min;
-  chart.options.scales.x.max = z_max;
-  // zoom limits
-  if(chart.options.plugins.zoom) {
-    chart.options.plugins.zoom.limits.x.min = z_min;
-    chart.options.plugins.zoom.limits.x.max = z_max;
-  }
+  px = x.getValueForPixel(e.offsetX);
+  py = y.getValueForPixel(e.offsetY);
 
-  chart.update();
-
-  chart.canvas.addEventListener('mousemove', (e) => { 
-    crosshair(chart, e);
-  });
-  chart.canvas.addEventListener("contextmenu", (e) => {
-
-    e.preventDefault();
-    cm.style.display = 'block';
-    cm.style.left = `${e.pageX}px`;
-    cm.style.top = `${e.pageY}px`;
-
-    const {data, scales:{x, y}} = chart;
+  // points clicked
+  points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+  if(points.length)
+    cm_rm.style.display = 'block';
     
-    px = x.getValueForPixel(e.offsetX);
-    py = y.getValueForPixel(e.offsetY);
+  // points nearby
+  points_n = chart.getElementsAtEventForMode(e, 'nearest', {intersect: false }, true);
+  
 
-    // points clicked
-    points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
-    if(points.length)
-      cm_rm.style.display = 'block';
-      
-    // points nearby
-    points_n = chart.getElementsAtEventForMode(e, 'nearest', {intersect: false }, true);
+});
+
+// toolbar
+document.getElementById("act-export").addEventListener("click", function () {
+  action_export_csv({ filename: "chart-data.csv", chart: chart })
+});
+document.getElementById("act-cycle").addEventListener("click", function () {
+  load_file('https://www.epa.gov/sites/default/files/2015-10/uddscol.txt')
+  // TODO update plot
+})
+document.getElementById("load-file").addEventListener("change", event => {
+  const files = event.target.files;
+  const file = files[0];
+  var fr = new FileReader();
+  fr.onload = function(e) { 
+    ret = parse_epa(e.target.result, '\t', '\r\n', 2);
     
+    var speed_ts = [];
+    var torque_ts = [];
 
-  });
+    var t     = ret[0];
+    var speed = ret[1];
 
-  // toolbar
-  document.getElementById("act-export").addEventListener("click", function () {
-    action_export_csv({ filename: "chart-data.csv", chart: chart })
-  });
-  document.getElementById("act-cycle").addEventListener("click", function () {
-    load_file('https://www.epa.gov/sites/default/files/2015-10/uddscol.txt')
-    // TODO update plot
-  })
-  document.getElementById("load-file").addEventListener("change", event => {
-    const files = event.target.files;
-    const file = files[0];
-    var fr = new FileReader();
-    fr.onload = function(e) { 
-      ret = parse_epa(e.target.result, '\t', '\r\n', 2);
-      
-      var speed_ts = [];
-      var torque_ts = [];
+    mph_to_kph = 1.60934;
+    mph_to_mps = 0.44704;
 
-      var t     = ret[0];
-      var speed = ret[1];
+    speed.forEach((value, i) => {
+      speed[i] *= mph_to_mps;
+      speed_ts.push({x:toDateTime(t[i]), y:value});
+    });
 
-      mph_to_kph = 1.60934;
-      mph_to_mps = 0.44704;
+    var accel = speed.map((x, i, a) => (x-(a[i-1]||0)));
+    var torque = accel.map((x) => x*dynpar.mass);
 
-      speed.forEach((value, i) => {
-        speed[i] *= mph_to_mps;
-        speed_ts.push({x:toDateTime(t[i]), y:value});
-      });
+    torque.forEach((value, i) => {
+      torque_ts.push({x:toDateTime(t[i]), y:value});
+    });
 
-      var accel = speed.map((x, i, a) => (x-(a[i-1]||0)));
-      var torque = accel.map((x) => x*dynpar.mass);
+    chart.data.datasets[0].data = speed_ts;
+    chart.data.datasets[1].data = torque_ts;
+    // reset zoom
+    chart.config.options.scales.x.min = speed_ts[0].x;
+    chart.config.options.scales.x.max = speed_ts[t.length - 1].x;
+    chart.update();
 
-      torque.forEach((value, i) => {
-        torque_ts.push({x:toDateTime(t[i]), y:value});
-      });
-
-      chart.data.datasets[0].data = speed_ts;
-      chart.data.datasets[1].data = torque_ts;
-      // reset zoom
-      chart.config.options.scales.x.min = speed_ts[0].x;
-      chart.config.options.scales.x.max = speed_ts[t.length - 1].x;
-      chart.update();
-
-      chart2.data.datasets[0].data = speed_ts;
-      chart2.update();
-    };
-    fr.readAsText(file);
-  });
-  document.getElementById("load-file").addEventListener('click', () => {
-    document.getElementById("load-file").value = null;
-  });
+    chart2.data.datasets[0].data = speed_ts;
+    chart2.update();
+  };
+  fr.readAsText(file);
+});
+document.getElementById("load-file").addEventListener('click', () => {
+  document.getElementById("load-file").value = null;
+});
 
 
-  chart2 = new Chart(
-    document.getElementById('chart-nav'), 
-    config_nav
-  );
-  chart2.config.data = data2;
-  chart2.update();
+chart2 = new Chart(
+  document.getElementById('chart-nav'), 
+  config_nav
+);
+chart2.config.data = data2;
 
-  // show zoombox
-  zoom_box(chart, chart2, z_min, z_max);
+//chart2.options.plugins.annotation.annotations.hl.xMin = toDateTime(1)
+chart2.options.plugins.annotation.annotations.hl.xMin = toDateTime(0)
+chart2.options.plugins.annotation.annotations.hl.xMax = toDateTime(1)
+chart2.options.plugins.annotation.annotations.hr.xMin = toDateTime(9)
+chart2.options.plugins.annotation.annotations.hr.xMax = toDateTime(10)
 
+chart2.update();

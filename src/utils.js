@@ -62,3 +62,18 @@ function select_ramp(chart, key) {
   //  {datasetIndex: 0, index: 1},
   //]);
 }
+
+function redraw() {
+  zoom_box(chart, chart2, z_min, z_max);
+}
+
+
+/*function min(ctx, datasetIndex, prop) {
+  const dataset = ctx.chart.data.datasets[datasetIndex];
+  return dataset.data.reduce((v, point) => Math.min(point[prop], v), Infinity);
+}
+
+function max(ctx, datasetIndex, prop) {
+  const dataset = ctx.chart.data.datasets[datasetIndex];
+  return dataset.data.reduce((v, point) => Math.max(point[prop], v), -Infinity);
+}*/
