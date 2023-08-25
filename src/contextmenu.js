@@ -77,7 +77,7 @@ m_add_ok.addEventListener('click', (e) => {
         {x: (t1+t2+t3),    y:q2   }
     );
     // shift array elements
-    for(var i=idx+3; i<chart.data.datasets[0].data.length-1; i++) {
+    for(var i=idx+3; i<chart.data.datasets[0].data.length; i++) {
         chart.data.datasets[0].data[i].x += (t1+t2+t3);
         chart.data.datasets[1].data[i].x += (t1+t2+t3);
     }
