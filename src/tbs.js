@@ -1,27 +1,20 @@
-
 // charts
 var chart, chart2;
 // points
 var points, points_n;
 
 // data
-//const t = [0, 1800, 1805, 86400] // seconds
-//var t =         [0, 10, 15,   16,   25,   26,   31, 35];
-//const speed =   [0, 0,  1500, 1500, 1500, 1500, 0,  0];
-//const torque =  [0, 0,  0,    5,    5,    0,    0,  0]; // Nm
 var t =         [0, 10]; // s
 const speed =   [0, 0]; // rpm
 const torque =  [0, 0]; // Nm
-
-var date = new Date();
 
 var speed_ts = [];
 var torque_ts = [];
 
 for(var i=0; i<t.length; i++) {
-  var sec = t[i] * 1000 //toDateTime(t[i]);
-  speed_ts.push({x: sec, y:speed[i]});
-  torque_ts.push({x: sec, y:torque[i]});
+  var sec = t[i] * 1000;
+  speed_ts.push({x: sec, y: speed[i]});
+  torque_ts.push({x: sec, y: torque[i]});
 }
 
 // dyno params
@@ -69,69 +62,64 @@ const data2 = {
     fill: true,
     pointRadius: 0,
     pointHoverRadius: 0
-  }
-  ]
+  }]
 };
 
+tmin = data.datasets[0].data[0].x;
+tmax = data.datasets[0].data[data.datasets[0].data.length-1].x;
 
-
+// document
 document.addEventListener("click", () => {
   cm.style.display = 'none';
-  //console.log('click');
 });
 
-
-// main chart
-const ctx = document.getElementById('chart');
-config.data = data;
-chart = new Chart(ctx, config);
-
-const z_min = data.datasets[0].data[0].x;
-const z_max = data.datasets[0].data[data.datasets[0].data.length-1].x;
-chart.options.scales.x.min = z_min;
-chart.options.scales.x.max = z_max;
-// zoom limits
-if(chart.options.plugins.zoom) {
-  chart.options.plugins.zoom.limits.x.min = z_min;
-  chart.options.plugins.zoom.limits.x.max = z_max;
-}
-
+// chart
+chart = new Chart(document.getElementById('chart'), config);
+chart.config.data = data;
+chart.options.scales.x.min = tmin;
+chart.options.scales.x.max = tmax;
 chart.update();
-
 chart.canvas.addEventListener('mousemove', (e) => { 
   crosshair(chart, e);
 });
 chart.canvas.addEventListener("contextmenu", (e) => {
 
   e.preventDefault();
+  // show custom menu
   cm.style.display = 'block';
   cm.style.left = `${e.pageX}px`;
   cm.style.top = `${e.pageY}px`;
 
-  const {data, scales:{x, y}} = chart;
-  
+  const {scales:{x, y}} = chart;
   px = x.getValueForPixel(e.offsetX);
   py = y.getValueForPixel(e.offsetY);
-
   // points clicked
   points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
   if(points.length)
     cm_rm.style.display = 'block';
-    
   // points nearby
   points_n = chart.getElementsAtEventForMode(e, 'nearest', {intersect: false }, true);
-  
-
 });
+
+
+// navigator
+chart2 = new Chart(document.getElementById('chart-nav'), config_nav);
+chart2.config.data = data2;
+chart2.options.scales.x.min = tmin;
+chart2.options.scales.x.max = tmax;
+chart2.options.plugins.annotation.annotations.box.xMin = tmin;
+chart2.options.plugins.annotation.annotations.box.xMax = tmax;
+chart2.update();
+
 
 // toolbar
-document.getElementById("act-export").addEventListener("click", function () {
-  action_export_csv({ filename: "chart-data.csv", chart: chart })
-});
-document.getElementById("act-cycle").addEventListener("click", function () {
-  load_file('https://www.epa.gov/sites/default/files/2015-10/uddscol.txt')
-  // TODO update plot
-})
+//document.getElementById("act-export").addEventListener("click", function () {
+//  action_export_csv({ filename: "chart-data.csv", chart: chart })
+//});
+//document.getElementById("act-cycle").addEventListener("click", function () {
+//  load_file('https://www.epa.gov/sites/default/files/2015-10/uddscol.txt')
+//  // TODO update plot
+//})
 document.getElementById("load-file").addEventListener("change", event => {
   const files = event.target.files;
   const file = files[0];
@@ -160,42 +148,28 @@ document.getElementById("load-file").addEventListener("change", event => {
       torque_ts.push({x:toDateTime(t[i]), y:value});
     });
 
+    tmin = speed_ts[0].x;
+    tmax = speed_ts[t.length - 1].x;
+
+    // chart
     chart.data.datasets[0].data = speed_ts;
     chart.data.datasets[1].data = torque_ts;
-    // reset zoom
-    chart.config.options.scales.x.min = speed_ts[0].x;
-    chart.config.options.scales.x.max = speed_ts[t.length - 1].x;
+    chart.config.options.scales.x.min = tmin;
+    chart.config.options.scales.x.max = tmax;
     chart.update();
 
+    // nav
     chart2.data.datasets[0].data = speed_ts;
+    chart2.config.options.scales.x.min = tmin;
+    chart2.config.options.scales.x.max = tmax;
+    chart2.options.plugins.annotation.annotations.box.xMin = tmin;
+    chart2.options.plugins.annotation.annotations.box.xMax = tmax;
     chart2.update();
+
+
   };
   fr.readAsText(file);
 });
 document.getElementById("load-file").addEventListener('click', () => {
   document.getElementById("load-file").value = null;
 });
-
-
-chart2 = new Chart(
-  document.getElementById('chart-nav'), 
-  config_nav
-);
-chart2.config.data = data2;
-
-chart2.options.scales.x.min = z_min;
-chart2.options.scales.x.max = z_max;
-
-let hand = 100
-
-chart2.options.plugins.annotation.annotations.box.xMin = 0
-chart2.options.plugins.annotation.annotations.box.xMax = z_max
-
-chart2.options.plugins.annotation.annotations.hl.xMin = 0
-chart2.options.plugins.annotation.annotations.hl.xMax = hand
-
-chart2.options.plugins.annotation.annotations.hr.xMax = z_max
-chart2.options.plugins.annotation.annotations.hr.xMin = z_max - hand
-
-
-chart2.update();

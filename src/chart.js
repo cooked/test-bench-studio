@@ -75,7 +75,7 @@ var config = {
         time: {
           unit: 'second',
           displayFormats: { 
-            second: 'mm:ss'
+            second: 'mm:ss:SSS'
           },
         },
       },

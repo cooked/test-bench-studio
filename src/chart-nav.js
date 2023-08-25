@@ -2,9 +2,9 @@
 
 var config_nav = {
     type: 'line',
-    plugins: [dragger],
+    plugins: [resetNav, dragger],
     options: {
-        events: ['mousedown', 'mouseup', 'mousemove', 'mouseout','click'],
+        events: ['mousedown', 'mouseup', 'mousemove','click','dblclick'],
         animation: false,
         layout: {
             padding: {
@@ -25,7 +25,8 @@ var config_nav = {
                 parsing: false,
                 grid: {
                     display: false
-                }
+                },
+                beginAtZero: true,
             },
             y: {
                 beginsAtZero: true,
@@ -45,9 +46,12 @@ var config_nav = {
                 enabled: false
             },
             annotation: {
+                clip: false,
+                common: {
+                    drawTime: 'afterDraw'
+                },
                 annotations: {
-                    box, 
-                    hl, hr
+                    box
                 }
             }
         }

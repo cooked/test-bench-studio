@@ -2,94 +2,134 @@
 
 let element;
 let lastEvent;
+let dragMode; // 0:none, 1:left-handle, 2:right-handle, 3:scroll
+let dbc = false;
+let handleSize = 10;
+
+let tmin, tmax; // full width
+
+const resetNav = {
+    id: 'resetNav',
+    beforeEvent: (ch, evt, opts) => {
+        if(evt.event.type == 'dblclick') {
+            chart.options.scales.x.min = tmin;
+            chart.options.scales.x.max = tmax;
+            chart.update('none')
+            ch.options.scales.x.min = tmin;
+            ch.options.scales.x.max = tmax;
+            ch.update('none')
+        }
+    }
+};
 
 let box = {
     type: 'box',
     backgroundColor: 'rgba(54, 162, 235, 0.2)',
     borderColor: 'rgba(54, 162, 235, 1)',
     borderWidth: 1,
-};
-let hl = {
-    type: 'box',
-    backgroundColor: 'rgba(54, 162, 235, 1)',
-    borderColor: 'rgba(54, 162, 235, 1)',
-    borderWidth: 1,
+    click(ctx) {
+        //console.log(dbc)
+    },
     enter(ctx) {
         element = ctx.element;
     },
-    leave() {
-        element = undefined;
-        lastEvent = undefined;
-    },
 };
-let hr = {
-    type: 'box',
-    backgroundColor: 'rgba(54, 162, 235, 1)',
-    borderColor: 'rgba(54, 162, 235, 1)',
-    borderWidth: 1,
-    enter(ctx) {
-        element = ctx.element;
-    },
-    leave() {
-        element = undefined;
-        lastEvent = undefined;
-    },
-};
-
-const drag = function(move) {
-    element.x += move;
-    element.x2 += move;
-    element.centerX += move;
-};
-  
-const handleElementDragging = function(event, chart) {
-
-    const dataX = chart.scales.x.getValueForPixel(element.centerX);
-
-    if (!lastEvent || !element) {
-        return;
-    }
-    const moveX = event.x - lastEvent.x;
-    // resize box
-    box.xMin = element.x
-    //box.centerX = (box.x+box.x2)/2;
-    
-    console.log(box);
-
-    drag(moveX);
-    lastEvent = event;
-    return true;
-};
-  
-  const handleDrag = function(event, chart) {
-    if (element) {
-      switch (event.type) {
-        case 'mousemove':
-            return handleElementDragging(event, chart);
-        //case 'mouseout':
-        case 'mouseup':
-            lastEvent = undefined;
-            break;
-        case 'mousedown':
-            lastEvent = event;
-            break;
-        default:
-      }
-    }
-  };
 
 const dragger = {
     id: 'dragger',
     beforeEvent(chart, args, options) {
-      if(handleDrag(args.event, chart)) {
-        args.changed = true;
-        return;
-      }
+        if (handleDrag(args.event, chart)) {
+            args.changed = true;
+            return;
+        }
     }
-  };
+};
+
+const handleDrag = function (event, nav) {
+
+    if (element) {
+
+        const { canvas, scales:{x} } = nav;
+
+        // left-handle
+        if (event.x < element.x + handleSize) {
+            canvas.style.cursor = 'col-resize';
+            dragMode = 1;
+            // right-handle
+        } else if (event.x > element.x2 -handleSize) {
+            canvas.style.cursor = 'col-resize';
+            dragMode = 2;
+            // scroll
+        } else {
+            canvas.style.cursor = 'all-scroll';
+        }
+
+        switch (event.type) {
+            case 'mousemove':
+                return drag(event, x);
+            case 'mouseout':
+            case 'mouseup':
+                lastEvent = undefined;
+                element = undefined;
+                dragMode = 0;
+                canvas.style.cursor = 'default';
+                break;
+            case 'mousedown':
+                dragMode = 0;
+                lastEvent = event;
+                break;
+            default:
+        }
+    }
+};
+
+const drag = function (event, xscale) {
+
+    if (!lastEvent || !element) {
+        return;
+    }
+
+    const dx = event.x - lastEvent.x;
+
+    // drag handles and resize box
+    switch (dragMode) {
+        case 1:
+            element.x += dx;
+            element.width -= dx;
+            chart.options.scales.x.min = xscale.getValueForPixel(element.x);
+            chart.update('none');
+            break;
+        case 2:
+            element.x2 += dx;
+            element.width += dx;
+            chart.options.scales.x.max = xscale.getValueForPixel(element.x2);
+            chart.update('none');
+            break;
+        default:
+            element.x += dx;
+            element.x2 += dx;
+            chart.options.scales.x.min = xscale.getValueForPixel(element.x + dx);
+            chart.options.scales.x.max = xscale.getValueForPixel(element.x + element.width);
+            chart.update('none');
+            break;
+    }
+
+    // limits
+    //console.log(element.x, chart.options.scales.x.min)
+    //if(xscale.getValueForPixel(element.x) == 0)
+    //    element.x = chart.options.scales.x.min
+    //if(element.x2 >= chart.options.scales.x.max)
+    //    element.x2 = chart.options.scales.x.max
+
+    lastEvent = event;
+    return true;
+};
+
+
+
 
 function zoom_box(chart, nav, min, max) {
-    
+
     //console.log(chart, nav, min, max);
     // min,max are from main chart scales
 
@@ -102,68 +142,8 @@ function zoom_box(chart, nav, min, max) {
     // TODO: BUG, add options to scales
     const { ctx, canvas, chartArea: { top, height }, scales: { x } } = nav;
 
-    const r = 5; 
+    const r = 5;
     const r2 = 2;
-
-
-    function zoom_box_item(min, max) {
-        // rect
-        //ctx.fillStyle = 'rgba(54, 162, 235, 0.2)';
-        //ctx.fillRect(x.getPixelForValue(min), top, x.getPixelForValue(max) - x.getPixelForValue(min), height);
-        //ctx.fillRect(0, 0, 50, 50);
-        //console.log(x.getPixelForValue(min), top, x.getPixelForValue(max) - x.getPixelForValue(min), height);
-
-        // size later
-        /*box.xMin = z_min
-        box.xMax = z_max
-        box.yMin = chart.options.scales.y.min
-        box.yMax = chart.options.scales.y.max
-*/
-        // handles
-        /*function zoom_box_handle(pos) {
-            const angle = Math.PI /180;
-            ctx.beginPath();
-            ctx.strokeStyle = 'rgba(54, 162, 235, 1)';
-            ctx.fillStyle = '#fff';
-            ctx.lineWidth = 1;
-            ctx.arc(pos, height/2, r, 0, angle*360, false);
-            ctx.moveTo(pos-r2,height/2+r2);
-            ctx.lineTo(pos-r2,height/2-r2);
-            ctx.moveTo(pos+r2,height/2+r2);
-            ctx.lineTo(pos+r2,height/2-r2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.closePath();
-        }*/
-        //zoom_box_handle(x.getPixelForValue(min));
-        //zoom_box_handle(x.getPixelForValue(max));
-    }
-    zoom_box_item(min, max);
-
-    // cursor
-    /*canvas.addEventListener('mousemove', (mm) => {
-        
-        mmv = x.getValueForPixel(mm.offsetX);
-
-        // if(mmv >= min-r && mmv <= min+r ||
-        //    mmv >= max-r && mmv <= max+r) {
-        //     canvas.style.cursor = 'ew-resize';
-        // } else if(  mmv > min+r && 
-        //             mmv < max-r) {
-        //     canvas.style.cursor = 'move';
-        // } else {
-        //     canvas.style.cursor = 'default';
-        }
-        if(mm.offsetX >= x.getPixelForValue(min)-r && mm.offsetX <= x.getPixelForValue(min)+r ||
-           mm.offsetX >= x.getPixelForValue(max)-r && mm.offsetX <= x.getPixelForValue(max)+r) {
-            canvas.style.cursor = 'ew-resize';
-        } else if(  mm.offsetX > x.getPixelForValue(min)+r && 
-                    mm.offsetX < x.getPixelForValue(max)-r) {
-            canvas.style.cursor = 'move';
-        } else {
-            canvas.style.cursor = 'default';
-        }
-    });*/
 
     // resize
     /*canvas.addEventListener('mousedown', (md) => {
@@ -188,11 +168,7 @@ function zoom_box(chart, nav, min, max) {
                 );
             }
         }
-    });
-    canvas.addEventListener('mouseup', (e) => {
-        canvas.style.cursor = 'default';
-        canvas.onmousemove = null;
     });*/
-    
+
 }
 
