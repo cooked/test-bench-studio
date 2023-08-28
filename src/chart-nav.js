@@ -53,7 +53,8 @@ var config_nav = {
                 annotations: {
                     box
                 }
-            }
+            },
+            boxselect: false
         }
     }
 }

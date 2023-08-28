@@ -40,6 +40,7 @@ const data = {
     backgroundColor: 'red',
     lineTension: 0,
     yAxisID: 'y',
+    order: 1
   },
   {
     label: 'Torque',
@@ -48,6 +49,7 @@ const data = {
     backgroundColor: 'grey',
     lineTension: 0,
     yAxisID: 'y1',
+    order: 2
   }
   ]
 };
@@ -73,12 +75,27 @@ document.addEventListener("click", () => {
   cm.style.display = 'none';
 });
 
+
 // chart
 chart = new Chart(document.getElementById('chart'), config);
 chart.config.data = data;
 chart.options.scales.x.min = tmin;
 chart.options.scales.x.max = tmax;
 chart.update();
+
+document.addEventListener('keypress', (e) => {
+
+  // delete something
+  if(e.key == 'Delete') {
+    deleteSelected();
+  }
+
+});
+chart.canvas.addEventListener('click', (e) => { 
+  // clear any selection
+  clearSelection();
+});
+
 chart.canvas.addEventListener('mousemove', (e) => { 
   crosshair(chart, e);
 });
