@@ -32,11 +32,11 @@ var config = {
           },
           mode: 'x',
           onZoomComplete: function() {
-            zoom_box(
-              chart, 
-              chart2, 
-              chart.options.scales.x.min,
-              chart.options.scales.x.max)
+            chart2.options.plugins.annotation.annotations.box.xMin = 
+              chart.options.scales.x.min;
+            chart2.options.plugins.annotation.annotations.box.xMax =
+              chart.options.scales.x.max;
+            chart2.update('none');
           }
         },
         pan: {
@@ -66,7 +66,21 @@ var config = {
           e.target.style.cursor = 'default'
         },
       },*/
-      
+      boxselect: {
+          select: {
+              enabled: true,
+              direction: 'xy'
+          },
+          callbacks: {
+              beforeSelect: function(startX, endX, startY, endY) {
+                  // return false to cancel selection
+                  return true;
+              },
+              afterSelect: function(startX, endX, startY, endY, datasets) {
+
+              }
+          }
+      },
     },
     scales: {
       x: {

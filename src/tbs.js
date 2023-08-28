@@ -4,7 +4,7 @@ var chart, chart2;
 var points, points_n;
 
 // data
-var t =         [0, 10]; // s
+var t =         [0, 1]; // s
 const speed =   [0, 0]; // rpm
 const torque =  [0, 0]; // Nm
 

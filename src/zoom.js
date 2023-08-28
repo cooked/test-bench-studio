@@ -8,31 +8,28 @@ let handleSize = 10;
 
 let tmin, tmax; // full width
 
+let box = {
+    type: 'box',
+    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+    borderColor: 'rgba(54, 162, 235, 1)',
+    borderWidth: 1,
+    enter(ctx) {
+        element = ctx.element;
+    },
+};
+
 const resetNav = {
     id: 'resetNav',
     beforeEvent: (ch, evt, opts) => {
         if(evt.event.type == 'dblclick') {
             chart.options.scales.x.min = tmin;
             chart.options.scales.x.max = tmax;
-            chart.update('none')
-            ch.options.scales.x.min = tmin;
-            ch.options.scales.x.max = tmax;
-            ch.update('none')
+            chart.update('none');
+            chart2.options.scales.x.min = tmin;
+            chart2.options.scales.x.max = tmax;
+            chart2.update('none');
         }
     }
-};
-
-let box = {
-    type: 'box',
-    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-    borderColor: 'rgba(54, 162, 235, 1)',
-    borderWidth: 1,
-    click(ctx) {
-        //console.log(dbc)
-    },
-    enter(ctx) {
-        element = ctx.element;
-    },
 };
 
 const dragger = {
@@ -124,51 +121,3 @@ const drag = function (event, xscale) {
     lastEvent = event;
     return true;
 };
-
-
-
-
-function zoom_box(chart, nav, min, max) {
-
-    //console.log(chart, nav, min, max);
-    // min,max are from main chart scales
-
-    //nav.update('none');
-
-    // TODO: fix bug where scales.x.max is a NaN
-    //if(isNaN(max))
-    //  max = chart.config.data.datasets[0].data[chart.config.data.datasets[0].data.length-1].x;
-
-    // TODO: BUG, add options to scales
-    const { ctx, canvas, chartArea: { top, height }, scales: { x } } = nav;
-
-    const r = 5;
-    const r2 = 2;
-
-    // resize
-    /*canvas.addEventListener('mousedown', (md) => {
-
-        mdv = x.getValueForPixel(md.offsetX);
-
-        const lh = md.offsetX >= x.getPixelForValue(min)-r && md.offsetX <= x.getPixelForValue(min)+r;
-        const rh = md.offsetX >= x.getPixelForValue(max)-r && md.offsetX <= x.getPixelForValue(max)+r;
-        if(lh || rh) {
-            canvas.onmousemove = (e) => {
-                // here we need chart 1?
-                const timestamp = x.getValueForPixel(e.offsetX);          
-                if(lh)
-                    chart.options.scales.x.min = new Date(timestamp);  
-                else
-                    chart.options.scales.x.max = new Date(timestamp); 
-                chart.update('none');
-                nav.update('none');
-                zoom_box_item(
-                    chart.options.scales.x.min, 
-                    chart.options.scales.x.max
-                );
-            }
-        }
-    });*/
-
-}
-

@@ -8,6 +8,7 @@
     <script type="text/javascript" src="lib/chartjs-plugin-annotation_3.0.1.min.js"></script>
     <script type="text/javascript" src="lib/hammer_2.0.7.min.js"></script>
     <script type="text/javascript" src="lib/chartjs-plugin-zoom_2.0.1.min.js"></script>
+    <script type="text/javascript" src="lib/chartjs-plugin-boxselect_5.3.5.min.js"></script>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,300,0,0" />
     <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/gotham-6">
@@ -62,21 +63,23 @@
 
     <div id="menu-add" class="menu-add" style="display: none;">
         <ul>
-            <li><label for="add-time">Delay from prev [s]: </label><input id="add-time" type="number"></li>
-            <li><label for="add-speed">Speed  [rpm]: </label><input id="add-speed" type="number"></li>
-            <li><label for="add-torque">Torque  [Nm]: </label><input id="add-torque" type="number"></li>
-            <li><label for="add-ramp">Ramp     [s]: </label><input id="add-ramp" type="number"></li>
-            <li><label for="add-duration">Duration [s]: </label><input id="add-duration" type="number"></li>
+            <li><label for="add-dly">Delay [s]: </label><input id="add-dly" type="number"></li>
+            <li><label for="add-acc">Accel [s]: </label><input id="add-acc" type="number"></li>
+            <li><label for="add-cru">Cruise [s]: </label><input id="add-cru" type="number"></li>
+            <li><label for="add-dec">Decel [s]: </label><input id="add-dec" type="number"></li>
+            <li><label for="add-spd">Speed  [rpm]: </label><input id="add-spd" type="number"></li>
+            <li><label for="add-trq">Torque  [Nm]: </label><input id="add-trq" type="number"></li>
+            
             <li><button id="add-cancel">Cancel</button><button id="add-ok">Add</button></li>
         </ul>
     </div>
 
     
     <script type="text/javascript" src="src/crosshair.js"></script>
-    <script type="text/javascript" src="src/contextmenu.js"></script>
     <script type="text/javascript" src="src/utils.js"></script>
     <script type="text/javascript" src="src/io.js"></script>
     <script type="text/javascript" src="src/zoom.js"></script>
+    <script type="text/javascript" src="src/contextmenu.js"></script>
     <script type="text/javascript" src="src/chart.js"></script>
     <script type="text/javascript" src="src/chart-nav.js"></script>
     
