@@ -1,7 +1,13 @@
 // main chart
 var config = {
   type: 'line',
+  plugins: [crosshairPlugin, boxselectPlugin],
   options: {
+    events: [
+      'mousemove', 'mouseout', 'click', 
+      'touchstart', 'touchmove','mousewheel',
+      'keyup','keydown','keypress'
+    ],
     responsive: true,
     stacked: false,
     animation: false,
@@ -13,14 +19,13 @@ var config = {
         borderWidth: 1
       },
       point: {
-        pointStyle: 'circle',
         radius: 0,
-        hitRadius: 10,
-        hoverRadius: 2,
-        hoverBorderWidth: 2,
-        borderWidth: 2,
-        borderColor: 'blue'
-
+        hitRadius: 3,
+        hoverRadius: 3,
+        borderWidth: 0,
+        borderColor: 'white',
+        hoverBorderColor: 'white',
+        pointHoverBorderWidth: 2
       }
     },
     plugins: {
@@ -56,22 +61,6 @@ var config = {
           }
         },
       },
-      /*crosshair: {
-        line: {
-          color: '#aaa',  // crosshair line color
-          width: 1        // crosshair line width
-        },
-        sync: {
-          enabled: false,            // enable trace line syncing with other charts
-        },
-        zoom: {
-          enabled: false,                                      // enable zooming
-          zoomboxBackgroundColor: 'rgba(66,133,244,0.2)',     // background color of zoom box 
-          zoomboxBorderColor: '#48F',                         // border color of zoom box
-          zoomButtonText: 'Reset Zoom',                       // reset zoom button text
-          zoomButtonClass: 'reset-zoom',                      // reset zoom button class
-        }
-      },*/
       /*dragData: {
         round: 1,
         dragX: true,
@@ -87,21 +76,7 @@ var config = {
           e.target.style.cursor = 'default'
         },
       },*/
-      boxselect: {
-        select: {
-          enabled: true,
-          direction: 'x'
-        },
-        callbacks: {
-          beforeSelect: function (startX, endX, startY, endY) {
-            // return false to cancel selection
-            return true;
-          },
-          afterSelect: function (startX, endX, startY, endY, datasets) {
-            updateDatasets_xline(startX, endX, startY, endY, datasets);
-          }
-        }
-      },
+      
     },
     scales: {
       x: {
@@ -131,6 +106,6 @@ var config = {
       },
     },
 
-
   }
 };
+

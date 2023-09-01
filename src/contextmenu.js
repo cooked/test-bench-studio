@@ -28,6 +28,11 @@ var v1,v2,v3,v4;
 var q1,q2,q3,q4;
 var va,qa;
 
+// document
+document.addEventListener("click", () => {
+    cm.style.display = 'none';
+});
+
 cm_edit.addEventListener('click', (e) => {
     console.log("edit");
 });
@@ -46,9 +51,6 @@ cm_ins.addEventListener('click', (e) => {
     if(data.datasets[0].data[idx].x - px > 0) {
         idx -= 1;
     }
-
-    //console.log(idx)
-    // TODO: highlight last point
 
     // use time of prev point
     m_add_dly.value = 0; //chart.data.datasets[el.datasetIndex].data[idx].x;

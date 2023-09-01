@@ -34,18 +34,6 @@ function fillArray(start, stop, step) {
     return arr;
 }
 
-//TODO: port it to time scales.. this one is for labels
-function del_point(chart, point) {
-  const index = point.index;
-  const dataset = point.datasetIndex;
-  const label = chart.data.labels[index];
-  const value = chart.data.datasets[dataset].data[index];
- 
-  chart.data.labels.splice(index, 1);
-  chart.data.datasets.forEach(el => { el.data.splice(index, 1); });
-  chart.update(data);
-
-}
 
 // add point, given chart and event
 function add_point(chart, e) {
@@ -66,14 +54,3 @@ function select_ramp(chart, key) {
 function redraw() {
   zoom_box(chart, chart2, z_min, z_max);
 }
-
-
-/*function min(ctx, datasetIndex, prop) {
-  const dataset = ctx.chart.data.datasets[datasetIndex];
-  return dataset.data.reduce((v, point) => Math.min(point[prop], v), Infinity);
-}
-
-function max(ctx, datasetIndex, prop) {
-  const dataset = ctx.chart.data.datasets[datasetIndex];
-  return dataset.data.reduce((v, point) => Math.max(point[prop], v), -Infinity);
-}*/

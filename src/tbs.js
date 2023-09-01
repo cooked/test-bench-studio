@@ -17,6 +17,8 @@ for(var i=0; i<t.length; i++) {
   torque_ts.push({x: sec, y: torque[i]});
 }
 
+var palette = ['#7494c2'];
+
 // dyno params
 const dynpar = {
   // ambient
@@ -36,20 +38,23 @@ const data = {
   datasets: [{
     label: 'Speed',
     data: speed_ts,
-    borderColor: 'red',
-    backgroundColor: 'red',
     lineTension: 0,
     yAxisID: 'y',
-    order: 1
+    order: 1,
+    borderColor: palette[0],     // line color
+    backgroundColor: palette[0], // point color
   },
   {
     label: 'Torque',
     data: torque_ts,
-    borderColor: 'grey',
-    backgroundColor: 'grey',
     lineTension: 0,
     yAxisID: 'y1',
-    order: 2
+    order: 2,
+    /*borderColor: function(context) {
+      const index = context.dataIndex;
+      const value = context.dataset.data[index];
+      return value < 0 ? 'red' : 'green';
+    },*/
   }
   ]
 };
@@ -63,17 +68,13 @@ const data2 = {
     lineTension: 0,
     fill: true,
     pointRadius: 0,
-    pointHoverRadius: 0
+    pointHoverRadius: 0,
+    
   }]
 };
 
 tmin = data.datasets[0].data[0].x;
 tmax = data.datasets[0].data[data.datasets[0].data.length-1].x;
-
-// document
-document.addEventListener("click", () => {
-  cm.style.display = 'none';
-});
 
 
 // chart
@@ -83,22 +84,6 @@ chart.options.scales.x.min = tmin;
 chart.options.scales.x.max = tmax;
 chart.update();
 
-document.addEventListener('keypress', (e) => {
-
-  // delete something
-  if(e.key == 'Delete') {
-    deleteSelected();
-  }
-
-});
-chart.canvas.addEventListener('click', (e) => { 
-  // clear any selection
-  clearSelection();
-});
-
-chart.canvas.addEventListener('mousemove', (e) => { 
-  crosshair(chart, e);
-});
 chart.canvas.addEventListener("contextmenu", (e) => {
 
   e.preventDefault();
@@ -138,10 +123,13 @@ chart2.update();
 //  // TODO update plot
 //})
 document.getElementById("load-file").addEventListener("change", event => {
-  const files = event.target.files;
-  const file = files[0];
+  
+  const file = event.target.files[0];
+  
   var fr = new FileReader();
+  
   fr.onload = function(e) { 
+
     ret = parse_epa(e.target.result, '\t', '\r\n', 2);
     
     var speed_ts = [];
@@ -186,7 +174,52 @@ document.getElementById("load-file").addEventListener("change", event => {
 
   };
   fr.readAsText(file);
+
 });
 document.getElementById("load-file").addEventListener('click', () => {
   document.getElementById("load-file").value = null;
+});
+
+// delete the points that have been previously selected
+document.addEventListener('keydown', (e) => {
+
+	if((e.key == 'Backspace' || e.key == 'Delete') && chart.boxselect.hasSelection) {
+
+		if(hds) {
+			
+			// calc dt
+			var dt = hds[0].data[ hds[0].data.length-1 ].x - hds[0].data[0].x;
+			
+			// first and last indexes
+			var start = hds[0].indexes[ 0 ];
+      var count = hds[0].indexes.length;
+			var end = start + count - 1;
+			
+      // remaining after 
+      var tot = chart.data.datasets[0].data.length;
+      
+      // shift array elements back in time
+			for(var i=end+1; i<tot-1; i++) {      
+				chart.data.datasets[0].data[i].x -= dt;
+				chart.data.datasets[1].data[i].x -= dt;
+				chart2.data.datasets[0].data[i].x -= dt;
+			}
+
+			chart.data.datasets[0].data.splice(start, count);
+			chart.data.datasets[1].data.splice(start, count);
+			chart2.data.datasets[0].data.splice(start, count);
+
+      
+      // clear chart
+      chart.data.datasets.pop();
+      chart.data.datasets.pop();
+      chart.boxselect.hasSelection = false;
+      chart.update();
+
+      // clear nav
+      chart2.update();
+
+		}
+	}
+  
 });

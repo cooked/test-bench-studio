@@ -6,6 +6,11 @@ var config_nav = {
     options: {
         events: ['mousedown', 'mouseup', 'mousemove','click','dblclick'],
         animation: false,
+        elements: {
+            line: {
+              borderWidth: 2
+            }
+          },
         layout: {
             padding: {
                 //left: chart.chartArea.left - 10,
@@ -53,8 +58,7 @@ var config_nav = {
                 annotations: {
                     box
                 }
-            },
-            boxselect: false
+            }
         }
     }
 }

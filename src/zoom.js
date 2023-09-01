@@ -1,4 +1,4 @@
-// zoom box
+// navigator,  zoom box
 
 let element;
 let lastEvent;
