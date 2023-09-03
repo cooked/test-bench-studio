@@ -2,12 +2,25 @@
 var config = {
   type: 'line',
   plugins: [crosshairPlugin, boxselectPlugin],
+  data: {
+    datasets: [{
+      label: 'Speed',
+      lineTension: 0,
+      yAxisID: 'y',
+      order: 1,
+      borderColor: palette[0],     // line color
+      backgroundColor: palette[0], // point color
+    },
+    {
+      label: 'Torque',
+      lineTension: 0,
+      yAxisID: 'y1',
+      order: 2,
+      borderColor: palette[2],     // line color
+      backgroundColor: palette[2], // point color
+    }]
+  },
   options: {
-    events: [
-      'mousemove', 'mouseout', 'click', 
-      'touchstart', 'touchmove','mousewheel',
-      'keyup','keydown','keypress'
-    ],
     responsive: true,
     stacked: false,
     animation: false,
@@ -80,12 +93,14 @@ var config = {
     },
     scales: {
       x: {
-        //type: 'linear',
         type: 'time',
         time: {
-          unit: 'second',
+          unit: 'minute',
           displayFormats: {
-            second: 'mm:ss:SSS'
+            second: 'mm:ss:SSS',
+            minute: 'mm:ss',
+            hour: 'hh:mm',
+            day:  'hh:mm'
           },
         },
       },
@@ -93,15 +108,14 @@ var config = {
         type: 'linear',
         display: true,
         position: 'left',
-        beginAtZero: true,
+        //beginAtZero: true,
       },
       y1: {
         type: 'linear',
         display: true,
         position: 'right',
-        // grid line settings
         grid: {
-          drawOnChartArea: false, // only want the grid lines for one axis to show up
+          drawOnChartArea: false
         },
       },
     },

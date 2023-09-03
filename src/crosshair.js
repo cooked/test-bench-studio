@@ -97,7 +97,7 @@ var crosshairPlugin = {
   id: "crosshair",
 
   defaults: {
-    events: ["mousemove", 'keyup','keydown','keypress','mousewheel'],
+    events: ["mousemove", 'mouseout'],
   },
 
   afterInit: function (chart) {
@@ -118,16 +118,21 @@ var crosshairPlugin = {
     if (e.inChartArea && e.event.type == "mousemove") {
       chart.crosshair.px = e.event.x;
       chart.crosshair.py = e.event.y;
+    } else {
+      chart.crosshair.px = null;
+      chart.crosshair.py = null;
     }
-    // TODO: investigate
+
     chart.draw();
   },
 
   afterDraw: function (chart, e) {
-    chart.ctx.save();
-    crosshair_lines(chart);
-    crosshair_labels(chart);
-    //crosshair_point(chart);
-    chart.ctx.restore();
+    if(chart.crosshair.px && chart.crosshair.py) {
+      chart.ctx.save();
+      crosshair_lines(chart);
+      crosshair_labels(chart);
+      //crosshair_point(chart);
+      chart.ctx.restore();
+    }
   },
 };

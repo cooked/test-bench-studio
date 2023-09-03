@@ -1,141 +1,108 @@
 // import, export
-function load_file(file) {
 
-    fetch('./api/some.json').then(
+// https://developer.chrome.com/articles/file-system-access/
+async function saveFile(blob, suggestedName) {
 
-        function (response) {
-            if (response.status !== 200) {
-                console.log('Looks like there was a problem. Status Code: ' + response.status);
-                return;
-            }
+  // Feature detection
+  const supportsFileSystemAccess =
+    'showSaveFilePicker' in window &&
+    (() => {
+      try {
+        return window.self === window.top;
+      } catch {
+        return false;
+      }
+    })();
 
-            // Examine the text in the response
-            response.text().then(function (data) {
-                console.log(data);
-            });
-        }
-
-    ).catch(function (err) {
-        console.log('Fetch Error :-S', err);
-    });
-}
-
-function data_to_csv(args) {
-    let result, colDelimiter, rowDelimiter, labels, data;
-
-    labels = args.labels;
-    ds = args.datasets;
-
-    colDelimiter = args.colDelimiter || ',';
-    rowDelimiter = args.rowDelimiter || '\n';
-
-    result = ''
-
-    for (let i = 0; i < labels.length; i++) {
-        result += labels[i];
-        for (let j = 0; j < ds.length; j++) {
-            result += colDelimiter;
-            result += ds[j].data[i];
-        }
-        result += rowDelimiter;
+  // if File System Access API is supported
+  if (supportsFileSystemAccess) {
+    try {
+      // Show the file save dialog.
+      const handle = await showSaveFilePicker({ suggestedName });
+      // Write the blob to the file.
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return;
+    } catch (err) {
+      // Fail silently if the user has simply canceled the dialog.
+      if (err.name !== 'AbortError') {
+        console.error(err.name, err.message);
+        return;
+      }
     }
+  }
 
-    return result;
-
-}
-
-function data_to_bnf(args) {
-
-}
-
-async function load_csv(delimiter = ',') {
-    const labels = [];
-    const value = [];
-
-    let data;
-
-    const file = new File('http://127.0.0.1:5500/data/epa/uddscol.txt');
-    const url = 'https://www.epa.gov/sites/default/files/2015-10/uddscol.txt';
-
-    var reader = new FileReader();
-    reader.onload = function (e) {
-        var contents = e.target.result;
-        console.log(contents);
-    };
-    reader.readAsText(file);
-
-    /*let myObject = await fetch(url, { 
-        mode: "cors", 
-        method: 'GET',
-        headers: {
-            "Accept": 'application/text',
-            "Access-Control-Allow-Origin" : "*"
-        },
-        //credentials: "omit"
-    });
-    let myText = await myObject.text();
-    console.log(myObject);*/
-
-    /*fetch(url, { mode: "no-cors"})
-        .then( r => r.text() )
-        .then( t => {
-            const d = data.split('\n');
-            table.forEach(row => {
-                const col = row.split(delimiter);
-                labels.push(col[0]);
-                value.push(col[1]);
-            });
-
-            console.log(t)
-        } )*/
+  // if not supported... Create the blob URL.
+  const blobURL = URL.createObjectURL(blob);
+  // Create the `<a download>` element and append it invisibly.
+  const a = document.createElement('a');
+  a.href = blobURL;
+  a.download = suggestedName;
+  a.style.display = 'none';
+  document.body.append(a);
+  // Programmatically click the element.
+  a.click();
+  // Revoke the blob URL and remove the element.
+  setTimeout(() => {
+    URL.revokeObjectURL(blobURL);
+    a.remove();
+  }, 1000);
 
 }
+
+async function loadFile() {
+  // Open file picker and destructure the result the first handle
+  const [fileHandle] = await window.showOpenFilePicker();
+  const file = await fileHandle.getFile();
+  return file;
+}
+
+// parsers, converters
 
 function parse_epa(data, dlm_col = ',', dlm_row = '\r\n', skip = 1) {
 
-    var time = [];
-    var value = [];
+  var time = [];
+  var value = [];
 
-    const d = data.split(dlm_row);
-    d.forEach(row => {
-        // process it, if not empty
-        if (row) {
-            const col = row.split(dlm_col);
-            time.push(col[0]);
-            value.push(col[1]);
-        }
-    });
+  const d = data.split(dlm_row);
+  d.forEach(row => {
+    // process it, if not empty
+    if (row) {
+      const col = row.split(dlm_col);
+      time.push(col[0]);
+      value.push(col[1]);
+    }
+  });
 
-    // header
-    time.splice(0, skip);
-    value.splice(0, skip);
+  // header
+  time.splice(0, skip);
+  value.splice(0, skip);
 
-    return [time, value];
+  return [time, value];
 }
 
-function action_export_csv(args) {
-    var data, filename, link;
-    var csv = "";
+function ds_to_csv(ds) {
+  // export datasets to a csv file (assuming time series) 
 
-    csv += data_to_csv({
-      datasets: chart.data.datasets,
-      labels: chart.data.labels
-    });
+  let nds = ds.length;
+  let npt = ds[0].data.length;
 
-    if (csv == null) return;
-    console.log(csv);
-  
-    filename = args.filename || 'chart-data.csv';
-    if (!csv.match(/^data:text\/csv/i)) {
-      csv = 'data:text/csv;charset=utf-8,' + csv;
+  const colDelimiter = ',';
+  const rowDelimiter = '\n';
+
+  let = result = '';
+
+  for (let i = 0; i < npt; i++) {
+    // add time
+    result += ds[0].data[i].x;
+    // add data
+    for (let j = 0; j < nds; j++) {
+      result += colDelimiter;
+      result += ds[j].data[i].y;
     }
-  
-    // not sure if anything below this comment works
-    data = encodeURI(csv);
-    link = document.createElement('a');
-    link.setAttribute('href', data);
-    link.setAttribute('download', filename);
-    document.body.appendChild(link); // Required for FF
-    link.click();
-    document.body.removeChild(link);
+    result += rowDelimiter;
   }
+  return result;
+
+}

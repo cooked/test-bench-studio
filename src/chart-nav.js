@@ -3,30 +3,31 @@
 var config_nav = {
     type: 'line',
     plugins: [resetNav, dragger],
+    data: {
+        datasets: [{
+            label: 'Overview',
+            backgroundColor: 'rgba(54,162,235,0.2)',
+            borderColor: 'rgba(54,162,235,1)',
+            lineTension: 0,
+            fill: true,
+            pointRadius: 0,
+            pointHoverRadius: 0,
+
+        }]
+    },
     options: {
-        events: ['mousedown', 'mouseup', 'mousemove','click','dblclick'],
+        events: ['mousedown', 'mouseup', 'mousemove', 'click', 'dblclick'],
         animation: false,
         elements: {
             line: {
-              borderWidth: 2
-            }
-          },
-        layout: {
-            padding: {
-                //left: chart.chartArea.left - 10,
-                //right: chart.width - chart.chartArea.right,
+                borderWidth: 2
             }
         },
         aspectRatio: 14,
         scales: {
             x: {
                 type: 'time',
-                time: {
-                    unit: 'second',
-                    displayFormats: {
-                        second: 'mm:ss:SSS'
-                    },
-                },
+                time: config.options.scales.x.time,
                 parsing: false,
                 grid: {
                     display: false
