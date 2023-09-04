@@ -18,3 +18,7 @@ var palette = [
     '#354f52',
     '#e63946'
 ];
+
+var settings = {
+    mode: 'pp', // pp: push-pull, ins: insert
+}
