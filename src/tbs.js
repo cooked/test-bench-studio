@@ -23,7 +23,7 @@ resetScaleX(chart);
 resetScaleX(chart2);
 
 // import/export file
-document.getElementById("act-import").addEventListener('click', () => {
+$("#act-import").on('click', () => {
   // select, then parse it
   loadFile().then( (file) => {
     var fr = new FileReader();
@@ -64,7 +64,7 @@ document.getElementById("act-import").addEventListener('click', () => {
 
   });
 });
-document.getElementById("act-export").addEventListener("click", () => {
+$("#act-export").on("click", () => {
   // prepare blob
   let blob = ds_to_csv(chart.data.datasets);
   // write to disk
@@ -169,7 +169,8 @@ $('#trap').on('submit', function (e) {
     chart2.data.datasets[0].data = chart.data.datasets[0].data;
     resetScaleX(chart);
     resetScaleX(chart2);
-
+    
+    return false;
 });
 
 $('#ramp').on('submit', function (e) {
@@ -192,6 +193,7 @@ $('#ramp').on('submit', function (e) {
     resetScaleX(chart);
     resetScaleX(chart2);
 
+    return false;
 });
 
 $('#edit').on('click', (e) => {

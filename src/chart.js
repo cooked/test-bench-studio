@@ -21,8 +21,6 @@ var config = {
     }]
   },
   options: {
-    responsive: true,
-    stacked: false,
     animation: false,
     aspectRatio: 3,
     // hide points here, or do it in datasets 
